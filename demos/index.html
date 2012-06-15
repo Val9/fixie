@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+		<title>CSS Transitions in IE9!</title>
+		<script src="../jquery-1.7.2.min.js"></script>
+		<script src="../fixie.js"></script>
+
+		<style type="text/css" media="screen">
+			
+			body, html {
+				margin: 0;
+				padding: 0;
+				font-family: Helvetica;
+				font-size: 16px;
+			}
+
+			p {
+				margin: 20px 20px 0px 20px;
+			}
+			
+			div.box {
+				height: 120px;
+				width: 120px;
+				background: #ccc;
+				border-radius: 5px;
+				padding: 10px;
+				margin: 20px;
+				float: left;
+				
+			}
+
+			div.box span {
+				color: #BB0000;
+				font-weight: bold;
+			}
+
+			div.fromsheet {
+				chocobo: waaaaark;
+			}
+		
+		</style>
+
+		<script type="text/javascript" charset="utf-8">
+			$(document).ready(function() {
+
+				// Specify a callback to Fixie so you can treat the found unknown CSS rules just the way you like
+				Fixie.callback = function(elem, prop, propValue) {
+					// Look 'ma, no jQuery here - this part has to be frickin' fast, as it might be executed during loops etc.
+					elem.getElementsByTagName('span')[0].innerHTML = propValue;
+				};
+
+				// Parse all stylesheets for this property
+				Fixie.parse('chocobo');
+
+				// Inline styles? No prob.
+				Fixie.apply('chocobo', '.inline');
+
+				// Wait what? You want to have crazy chocobo go crazy? Well alright.
+				// EDIT: IE9 YOU FUCKER! WHY DO YOU NOT REPORT MY PRECIOUS UNKNOWN CSS PROPS THROUGH PROPERTYCHANGE!
+				Fixie.track('chocobo', '.dynamic');
+
+				var l = 5, d = -1, str = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', elem = $('.dynamic')[0];
+				setInterval(function() {
+					l += d;
+					d = (l == 3) ? 1 : (l == 20 ? -1 : d);
+					elem.style.chocobo = 'w' + str.substr(0, l) + 'rk';
+				}, 1000);
+
+
+				// Reduced test to visualize that both events don't fire for IE and custom props
+				elem.addEventListener('DOMAttrModified', function() {
+					console.log('domattr change');
+				}, false);
+
+				elem.attachEvent('onpropertychange', function() {
+					console.log('prop change');
+				});
+
+				// as suggested by @wpbasti on Twitter
+				// unfortunately never fires
+				elem.addEventListener('propertyChange', function() {
+					console.log('prop change 2');
+				}, false);		
+
+				//elem.style['color'] = '#000'; // this works!
+				elem.style['chocobo'] = 'wark'; // this doesn't :'(
+
+			});
+		</script>
+
+	</head>
+	<body>
+
+		<p>If you are running this page in any version of Internet Explorer, the content of the spans in the divs below should be automatically replaced with values found in the unknown CSS property "chocobo".</p>
+		
+		<div class="box fromsheet">
+			Stylesheet Chocobo says: <span>(Nothing, seems you're not using IE..)</span>
+		</div>
+
+		<div class="box inline" style="chocobo: woohiiihooo;">
+			Inline Chocobo says: <span>(Nothing, seems you're not using IE..)</span>
+		</div>
+
+		<div class="box dynamic">
+			Dynamic Chocobo says: <span>(Nothing, seems you're not using IE..)</span>
+		</div>
+		
+
+	</body>
+</html>
